@@ -1,0 +1,170 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  id              Int      @id @default(autoincrement())
+  nombre          String   @unique
+  telefono        String   @unique
+  email           String   @unique
+  direccion       String
+  fechaNacimiento DateTime
+  contrasena      String
+  rol             Role     @default(Cliente)
+  Mascota Mascota[]
+  Cita Cita[]
+  Factura Factura[]
+}
+
+model Sucursal {
+  id                Int    @id @default(autoincrement())
+  nombre            String @unique
+  descripcion       String
+  telefono          String
+  direccion         String
+  correoElectronico String @unique
+  Servicio Servicio[] 
+  Horario Horario []
+  Cita Cita[]
+}
+
+model Mascota {
+  id              Int      @id @default(autoincrement())
+  nombre          String
+  especie         String
+  raza            String
+  sexo            Sexo
+  fechaNacimiento DateTime
+  cliente         Usuario  @relation(fields: [idCliente], references: [id])
+  idCliente       Int
+  Cita Cita[]
+}
+
+model Servicio {
+  id              Int      @id @default(autoincrement())
+  nombre          String
+  descripcion     String
+  tarifa          Decimal
+  tiempoServicio  DateTime
+  TipoMascota String
+  Especialidad String
+  sucursal        Sucursal @relation(fields: [idSucursal], references: [id])
+  idSucursal      Int
+  Cita Cita []
+  DetalleFactura DetalleFactura[]
+}
+
+model Producto {
+  id                 Int       @id @default(autoincrement())
+  idCategoria        Int
+  nombre             String
+  descripcion        String
+  categoria          categoria @relation(fields: [idCategoria], references: [id])
+  precio             Decimal
+  Marca String
+  TipoMascota String
+  DetalleFactura DetalleFactura[]
+}
+
+model categoria {
+  id     Int    @id @default(autoincrement())
+  nombre String
+  Producto Producto []
+}
+
+model Horario {
+  id         Int      @id @default(autoincrement())
+  diaSemana  Semana
+  horaInicio DateTime
+  horaFin    DateTime
+  sucursal   Sucursal @relation(fields: [idSucursal], references: [id])
+  idSucursal Int
+}
+
+model Cita {
+  id            Int      @id @default(autoincrement())
+  cliente       Usuario  @relation(fields: [idCliente], references: [id])
+  mascota       Mascota? @relation(fields: [idMascota], references: [id])
+  servicio      Servicio @relation(fields: [idServicio], references: [id])
+  sucursal      Sucursal @relation(fields: [idSucursal], references: [id])
+  fechaCita     DateTime
+  horaCita      DateTime
+  estado        Estado
+  observaciones String
+  idCliente     Int
+  idMascota     Int?
+  idServicio    Int
+  idSucursal    Int
+  // Factura Factura[]
+}
+
+model Factura {
+  id           Int      @id @default(autoincrement())
+  idCliente Int
+  Cliente Usuario? @relation(fields: [idCliente],references: [id])
+  fechaFactura DateTime
+  subtotal     Decimal
+  impuesto     Decimal
+  total        Decimal
+  metodoPago   FormaPago
+  DetalleFactura DetalleFactura[]
+  
+}
+
+model DetalleFactura {
+  id             Int       @id @default(autoincrement())
+  factura        Factura   @relation(fields: [idFactura], references: [id])
+  producto       Producto? @relation(fields: [idProducto], references: [id])
+  servicio       Servicio? @relation(fields: [idServicio], references: [id])
+  cantidad       Int
+  precioUnitario Decimal
+  totalItem      Decimal
+  idFactura      Int
+  idProducto     Int?
+  idServicio     Int?
+}
+
+enum Role {
+  Administrador
+  Encargado
+  Cliente
+}
+
+enum Semana {
+  Lunes
+  Martes
+  Miercoles
+  Jueves
+  Viernes
+}
+
+enum Sexo {
+  Macho
+  Hembra
+}
+
+enum Estado {
+  Pendiente
+  Confirmada
+  Reprogramada
+  Completada
+  Cancelada
+  No_Asistio
+}
+
+enum FormaPago {
+Efectivo
+Tarjeta
+Transferencia
+}

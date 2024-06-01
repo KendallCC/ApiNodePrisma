@@ -118,6 +118,12 @@ Esto iniciara el programa y al realizar cambios en el codigo se actualizaran
 | Parametro | Tipo de dato     | Descripción                       |
 | :-------- | :------- | :-------------------------------- |
 | `nombre`      | `String` | **Requerido**. Nombre del Usuario|
+| `telefono`      | `String` | **Requerido**. Nombre del Usuario|
+| `email`      | `String` | **Requerido**. email del Usuario|
+| `direccion`      | `String` | **Requerido**. direccion del Usuario|
+| `fechaNacimiento`      | `datetime` | **Requerido**. fecha de Nacimiento del Usuario|
+| `contrasena`      | `String` | **Requerido**. contraseña del Usuario|
+| `rol`      | `String` | **Requerido**. rol del Usuario (Administrador,Encargado,Cliente)|
 
 #### Actualizar un Usuario
 

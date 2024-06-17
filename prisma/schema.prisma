@@ -13,140 +13,10 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Usuario {
-  id              Int      @id @default(autoincrement())
-  nombre          String   @unique
-  telefono        String   @unique
-  email           String   @unique
-  direccion       String
-  fechaNacimiento DateTime
-  contrasena      String
-  rol             Role     @default(Cliente)
-  Mascota Mascota[]
-  Cita Cita[]
-  Factura Factura[]
-}
-
-model Sucursal {
-  id                Int    @id @default(autoincrement())
-  nombre            String @unique
-  descripcion       String
-  telefono          String
-  direccion         String
-  correoElectronico String @unique
-  Servicio Servicio[] 
-  Horario Horario []
-  Cita Cita[]
-}
-
-model Mascota {
-  id              Int      @id @default(autoincrement())
-  nombre          String
-  especie         String
-  raza            String
-  sexo            Sexo
-  fechaNacimiento DateTime
-  cliente         Usuario  @relation(fields: [idCliente], references: [id])
-  idCliente       Int
-  Cita Cita[]
-}
-
-model Servicio {
-  id              Int      @id @default(autoincrement())
-  nombre          String
-  descripcion     String
-  tarifa          Decimal
-  tiempoServicio  DateTime
-  TipoMascota String
-  Especialidad String
-  sucursal        Sucursal @relation(fields: [idSucursal], references: [id])
-  idSucursal      Int
-  Cita Cita []
-  DetalleFactura DetalleFactura[]
-}
-
-model Producto {
-  id                 Int       @id @default(autoincrement())
-  idCategoria        Int
-  nombre             String
-  descripcion        String
-  categoria          categoria @relation(fields: [idCategoria], references: [id])
-  precio             Decimal
-  Marca String
-  TipoMascota String
-  DetalleFactura DetalleFactura[]
-}
-
-model categoria {
-  id     Int    @id @default(autoincrement())
-  nombre String
-  Producto Producto []
-}
-
-model Horario {
-  id         Int      @id @default(autoincrement())
-  diaSemana  Semana
-  horaInicio DateTime
-  horaFin    DateTime
-  sucursal   Sucursal @relation(fields: [idSucursal], references: [id])
-  idSucursal Int
-}
-
-model Cita {
-  id            Int      @id @default(autoincrement())
-  cliente       Usuario  @relation(fields: [idCliente], references: [id])
-  mascota       Mascota? @relation(fields: [idMascota], references: [id])
-  servicio      Servicio @relation(fields: [idServicio], references: [id])
-  sucursal      Sucursal @relation(fields: [idSucursal], references: [id])
-  fechaCita     DateTime
-  horaCita      DateTime
-  estado        Estado
-  observaciones String
-  idCliente     Int
-  idMascota     Int?
-  idServicio    Int
-  idSucursal    Int
-  // Factura Factura[]
-}
-
-model Factura {
-  id           Int      @id @default(autoincrement())
-  idCliente Int
-  Cliente Usuario? @relation(fields: [idCliente],references: [id])
-  fechaFactura DateTime
-  subtotal     Decimal
-  impuesto     Decimal
-  total        Decimal
-  metodoPago   FormaPago
-  DetalleFactura DetalleFactura[]
-  
-}
-
-model DetalleFactura {
-  id             Int       @id @default(autoincrement())
-  factura        Factura   @relation(fields: [idFactura], references: [id])
-  producto       Producto? @relation(fields: [idProducto], references: [id])
-  servicio       Servicio? @relation(fields: [idServicio], references: [id])
-  cantidad       Int
-  precioUnitario Decimal
-  totalItem      Decimal
-  idFactura      Int
-  idProducto     Int?
-  idServicio     Int?
-}
-
-enum Role {
-  Administrador
-  Encargado
-  Cliente
-}
-
-enum Semana {
-  Lunes
-  Martes
-  Miercoles
-  Jueves
-  Viernes
+enum Rol {
+  cliente
+  encargado
+  administrador
 }
 
 enum Sexo {
@@ -154,17 +24,166 @@ enum Sexo {
   Hembra
 }
 
-enum Estado {
+enum DiaSemana {
+  Lunes
+  Martes
+  Miercoles
+  Jueves
+  Viernes
+  Sabado
+  Domingo
+}
+
+enum EstadoCita {
   Pendiente
   Confirmada
   Reprogramada
   Completada
   Cancelada
-  No_Asistio
+  No_asistio
 }
 
-enum FormaPago {
-Efectivo
-Tarjeta
-Transferencia
+enum MetodoPago {
+  Efectivo
+  Tarjeta
+  Transferencia
+}
+
+enum EstadoFactura {
+  Proforma
+  Facturada
+}
+
+enum TipoRepeticion {
+  Ninguno
+  Diario
+  Semanal
+  Mensual
+}
+
+model Usuario {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  telefono           String
+  correo_electronico String    @unique
+  direccion          String
+  fecha_nacimiento   DateTime
+  contrasena         String
+  rol                Rol
+  sucursal           Sucursal? @relation(fields: [id_sucursal], references: [id])
+  id_sucursal        Int
+  mascotas           Mascota[]
+  citas              Cita[]
+}
+
+model Sucursal {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  descripcion        String
+  telefono           String
+  direccion          String
+  correo_electronico String    @unique
+  usuarios           Usuario[]
+  horarios           Horario[]
+  citas              Cita[]
+}
+
+model Mascota {
+  id               Int      @id @default(autoincrement())
+  nombre           String
+  especie          String
+  raza             String
+  sexo             Sexo
+  fecha_nacimiento DateTime
+  cliente          Usuario  @relation(fields: [id_cliente], references: [id])
+  id_cliente       Int
+  citas            Cita[]
+}
+
+model Servicio {
+  id              Int              @id @default(autoincrement())
+  nombre          String
+  descripcion     String
+  tarifa          Float
+  tiempo_servicio DateTime
+  Tipo_mascota    String
+  Especialidad    String
+  citas           Cita[]
+  detalle_factura DetalleFactura[]
+}
+
+model Categoria {
+  id        Int        @id @default(autoincrement())
+  nombre    String
+  productos Producto[]
+}
+
+model Producto {
+  id              Int              @id @default(autoincrement())
+  nombre          String
+  descripcion     String
+  categoria       Categoria        @relation(fields: [id_categoria], references: [id])
+  id_categoria    Int
+  precio          Float
+  Marca           String
+  Tipo_mascota    String
+  detalle_factura DetalleFactura[]
+}
+
+model Horario {
+  id          Int            @id @default(autoincrement())
+  sucursal    Sucursal       @relation(fields: [id_sucursal], references: [id])
+  id_sucursal Int
+  dia_semana  DiaSemana
+  hora_inicio DateTime
+  hora_fin    DateTime
+  fecha       DateTime?
+  bloqueo     Boolean        @default(false)
+  repeticion  TipoRepeticion
+}
+
+model Cita {
+  id            Int        @id @default(autoincrement())
+  cliente       Usuario    @relation(fields: [id_cliente], references: [id])
+  id_cliente    Int
+  mascota       Mascota?   @relation(fields: [id_mascota], references: [id])
+  id_mascota    Int?
+  servicio      Servicio   @relation(fields: [id_servicio], references: [id])
+  id_servicio   Int
+  sucursal      Sucursal   @relation(fields: [id_sucursal], references: [id])
+  id_sucursal   Int
+  fecha_cita    DateTime
+  hora_cita     DateTime
+  estado        EstadoCita
+  observaciones String
+  motivo        String // Por ejemplo: "¿Cuál es el motivo de la visita?"
+  condicion     String // Por ejemplo: "¿La mascota tiene alguna condición médica preexistente?"
+  vacunas       String // Por ejemplo: "¿La mascota ha recibido todas sus vacunas?"
+  facturas      Factura[]
+}
+
+model Factura {
+  id              Int              @id @default(autoincrement())
+  cita            Cita?            @relation(fields: [id_cita], references: [id])
+  id_cita         Int?
+  fecha_factura   DateTime
+  subtotal        Float
+  impuesto        Float
+  total           Float
+  metodo_pago     MetodoPago
+  estado          EstadoFactura
+  detalle_factura DetalleFactura[]
+}
+
+model DetalleFactura {
+  id              Int       @id @default(autoincrement())
+  factura         Factura   @relation(fields: [id_factura], references: [id])
+  id_factura      Int
+  producto        Producto? @relation(fields: [id_producto], references: [id])
+  id_producto     Int?
+  servicio        Servicio? @relation(fields: [id_servicio], references: [id])
+  id_servicio     Int?
+  cantidad        Int
+  precio_unitario Float
+  total_item      Float
 }

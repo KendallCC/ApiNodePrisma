@@ -1,35 +1,35 @@
-import { Role } from "@prisma/client"
+import { Rol } from "@prisma/client"
 
 
-export const Usuarios=[
-    {
-      
-      "nombre": "Kendall Cespedes Castillo",
-      "telefono": "86586810",
-      "email": "Kendall26092002@gmail.com",
-      "direccion": "Calle 10 San Jose",
-      "fechaNacimiento": "1980-01-01T00:00:00.000Z",
-      "contrasena": "password123",
-      "rol": Role.Administrador
-    },
-    {
-      
-      "nombre": "Encargado",
-      "telefono": "111111111",
-      "email": "starco26092002@gmail.com",
-      "direccion": "Calle 5 Avenida Central",
-      "fechaNacimiento": "1990-02-02T00:00:00.000Z",
-      "contrasena": "password456",
-      "rol": Role.Encargado
-    },
-    {
-      
-      "nombre": "Cliente",
-      "telefono": "22222222",
-      "email": "kendall.cesp@gmail.com",
-      "direccion": "Calle 15 Barrio Escalante",
-      "fechaNacimiento": "2000-03-03T00:00:00.000Z",
-      "contrasena": "password789",
-      "rol": Role.Cliente
-    }
-  ]
+export const usuarios = [
+  {
+    nombre: 'Juan Pérez',
+    telefono: '12345678',
+    correo_electronico: 'juan.perez@example.com',
+    direccion: 'Calle Falsa 123',
+    fecha_nacimiento: new Date('1990-01-01'),
+    contrasena: 'password123',
+    rol: Rol.cliente,
+    id_sucursal: 1,
+  },
+  {
+    nombre: 'María García',
+    telefono: '87654321',
+    correo_electronico: 'maria.garcia@example.com',
+    direccion: 'Avenida Siempre Viva 742',
+    fecha_nacimiento: new Date('1985-05-15'),
+    contrasena: 'password456',
+    rol: Rol.administrador,
+    id_sucursal: 2,
+  },
+  {
+    nombre: 'Carlos Rodríguez',
+    telefono: '11223344',
+    correo_electronico: 'carlos.rodriguez@example.com',
+    direccion: 'Boulevard de los Sueños Rotos 101',
+    fecha_nacimiento: new Date('1975-12-20'),
+    contrasena: 'password789',
+    rol: Rol.encargado,
+    id_sucursal: 3,
+  },
+];

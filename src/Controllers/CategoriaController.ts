@@ -18,6 +18,7 @@ export async function ObtenerCategoria(request: Request, response: Response) {
     await prisma.categoria.findFirst(
         {
             where: { id: parseInt(id) }
+            
         }
     ).then(async (categorias) => {
         await prisma.$disconnect();

@@ -61,7 +61,7 @@ export async function ListarCitas(request: Request, response: Response) {
 
 export async function ObtenerCita(request: Request, response: Response) {
     const id = request.params.id
-    await prisma.cita.findFirst(
+    await prisma.cita.findUnique(
         {
             where: { id: parseInt(id) },
             select:{

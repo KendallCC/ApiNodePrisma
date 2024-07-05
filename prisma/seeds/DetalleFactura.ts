@@ -26,7 +26,7 @@ export const detalles_factura = [
   {
     id_factura: 4,
     id_producto: 4,
-    id_servicio: 4,
+    id_servicio: null,
     cantidad: 1,
     precio_unitario: 25000.0,
     total_item: 25000.0,
@@ -177,7 +177,7 @@ export const detalles_factura = [
   },
   {
     id_factura: 3,
-    id_producto: 3,
+    id_producto: null,
     id_servicio: null,
     cantidad: 1,
     precio_unitario: 12500.0,
@@ -185,8 +185,8 @@ export const detalles_factura = [
   },
   {
     id_factura: 4,
-    id_producto: null,
-    id_servicio: 5,
+    id_producto: 11,
+    id_servicio: null,
     cantidad: 1,
     precio_unitario: 25000.0,
     total_item: 25000.0,
@@ -337,7 +337,7 @@ export const detalles_factura = [
   },
   {
     id_factura: 3,
-    id_producto: 5,
+    id_producto: null,
     id_servicio: 5,
     cantidad: 1,
     precio_unitario: 50000.0,
@@ -346,7 +346,7 @@ export const detalles_factura = [
   {
     id_factura: 4,
     id_producto: 6,
-    id_servicio: 6,
+    id_servicio: null,
     cantidad: 1,
     precio_unitario: 100000.0,
     total_item: 100000.0,

@@ -61,7 +61,27 @@ export async function ActualizarServicios(request: Request, response: Response) 
         return response.json(servicio)
     }).catch(async () => {
         await prisma.$disconnect();
-        response.status(400).send('Error:mascota no pudo ser Actualizada');
+        response.status(400).send('Error:Servicio no pudo ser Actualizada');
+    })
+}
+
+
+export async function BorrarServicios(request: Request, response: Response) {
+
+    await prisma.servicio.delete(
+        {
+            where: { id: parseInt(request.params.id) },
+           
+        }
+    ).then(async (servicio) => {
+        await prisma.$disconnect();
+        response.status(200)
+        return response.json(servicio)
+    }).catch(async (e) => {
+        await prisma.$disconnect();
+        response.status(400).send('Error:Servicio no pudo ser Eliminado');
+        console.log(e);
+        
     })
 }
 

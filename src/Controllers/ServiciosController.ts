@@ -1,4 +1,5 @@
 import { PrismaClient } from "@prisma/client";
+import { log } from "console";
 import { Request, Response } from 'express';
 const prisma = new PrismaClient();
 
@@ -26,11 +27,12 @@ export async function ObtenerServicios(request: Request, response: Response) {
         return response.json(servicio)
     }).catch(async () => {
         await prisma.$disconnect();
-        response.status(400).send('Error:mascota no encontradas');
+        response.status(400).send('Error:Servicio no encontradas');
     })
 }
 
 export async function CrearServicios(request: Request, response: Response) {
+
 
     await prisma.servicio.create(
         {
@@ -42,7 +44,7 @@ export async function CrearServicios(request: Request, response: Response) {
         return response.json(servicio)
     }).catch(async () => {
         await prisma.$disconnect();
-        response.status(400).send('Error:mascota no pudo ser agregada');
+        response.status(400).send('Error:Servicio no pudo ser agregada');
     })
 }
 

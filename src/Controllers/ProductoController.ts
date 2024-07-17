@@ -3,7 +3,7 @@ import { Request, Response } from 'express';
 const prisma = new PrismaClient();
 
 export async function ListarProductos(request: Request, response: Response) {
-    await prisma.producto.findMany().then(async (Producto) => {
+    await prisma.producto.findMany({include:{categoria:true}}).then(async (Producto) => {
         await prisma.$disconnect();
         response.status(200)
         return response.json(Producto)
@@ -32,9 +32,23 @@ export async function ObtenerProducto(request: Request, response: Response) {
 
 export async function CrearProducto(request: Request, response: Response) {
 
+const {nombre,descripcion,precio,Marca,Tipo_mascota,categoria} = request.body
+
+const producto={
+    nombre:nombre,
+    descripcion: descripcion, 
+    precio: precio,
+    Marca:Marca,
+    Tipo_mascota:Tipo_mascota,
+    id_categoria:categoria
+}
+
+console.log(producto);
+
+
     await prisma.producto.create(
         {
-            data: request.body
+            data: producto
         }
     ).then(async (producto) => {
         await prisma.$disconnect();
@@ -47,11 +61,38 @@ export async function CrearProducto(request: Request, response: Response) {
 }
 
 export async function ActualizarProducto(request: Request, response: Response) {
+    const {nombre,descripcion,precio,Marca,Tipo_mascota,categoria} = request.body
+    const producto={
+        nombre:nombre,
+        descripcion: descripcion, 
+        precio: precio,
+        Marca:Marca,
+        Tipo_mascota:Tipo_mascota,
+        id_categoria:categoria
+    }
+    
+
 
     await prisma.producto.update(
         {
             where: { id: parseInt(request.params.id) },
-            data: request.body
+            data: producto
+        }
+    ).then(async (producto) => {
+        await prisma.$disconnect();
+        response.status(200)
+        return response.json(producto)
+    }).catch(async () => {
+        await prisma.$disconnect();
+        response.status(400).send('Error:producto no pudo ser Actualizada');
+    })
+}
+
+export async function BorrarProducto(request: Request, response: Response) {
+
+    await prisma.producto.delete(
+        {
+            where: { id: parseInt(request.params.id) },
         }
     ).then(async (producto) => {
         await prisma.$disconnect();

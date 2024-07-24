@@ -323,4 +323,40 @@ export const usuarios = [
     rol: Rol.administrador,
     id_sucursal: 10,
   },
+  //usuarios sin sucursal
+
+{
+  nombre: "Pepe Gomez",
+  telefono: "555-1112",
+  correo_electronico: "Pepe.gomez@vetpet.com",
+  direccion: "Calle Verdadera 456",
+  fecha_nacimiento: new Date("1990-02-02"),
+  contrasena: "contrasena2",
+  rol: Rol.encargado,
+  id_sucursal: null,
+},
+
+{
+  nombre: "Rosita Gomez",
+  telefono: "555-1112",
+  correo_electronico: "Rosita.gomez@vetpet.com",
+  direccion: "Calle Verdadera 456",
+  fecha_nacimiento: new Date("1990-02-02"),
+  contrasena: "contrasena2",
+  rol: Rol.encargado,
+  id_sucursal: null,
+},
+
+{
+  nombre: "Roma Gomez",
+  telefono: "555-1112",
+  correo_electronico: "Roma.gomez@vetpet.com",
+  direccion: "Calle Verdadera 456",
+  fecha_nacimiento: new Date("1990-02-02"),
+  contrasena: "contrasena2",
+  rol: Rol.encargado,
+  id_sucursal: null,
+},
 ];
+
+

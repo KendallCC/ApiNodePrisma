@@ -17,7 +17,7 @@ export const horarios = [
     hora_inicio: new Date("2024-01-02T08:00:00Z"),
     hora_fin: new Date("2024-01-02T17:00:00Z"),
     fecha: new Date("2024-01-02T00:00:00Z"),
-    bloqueo: false,
+    bloqueo: true,
     repeticion: TipoRepeticion.Diario,
   },
   {
@@ -35,7 +35,7 @@ export const horarios = [
     hora_inicio: new Date("2024-01-04T08:00:00Z"),
     hora_fin: new Date("2024-01-04T17:00:00Z"),
     fecha: new Date("2024-01-04T00:00:00Z"),
-    bloqueo: false,
+    bloqueo: true,
     repeticion: TipoRepeticion.Mensual,
   },
 ];

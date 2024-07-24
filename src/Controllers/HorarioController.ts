@@ -40,9 +40,11 @@ export async function CrearHorario(request: Request, response: Response) {
 
   const horaInicio = new Date(hora_inicio);
   const horaFin = new Date(hora_fin);
-  
+  const fechaBloqueo = new Date(fecha);
+
   // Validación de fecha vigente
-  if (new Date(fecha) < new Date()) {
+  const fechaActual = new Date();
+  if (fechaBloqueo.setHours(0, 0, 0, 0) < fechaActual.setHours(0, 0, 0, 0)) {
     return response.status(400).send("Error: La fecha debe ser actual o futura");
   }
 
@@ -115,14 +117,71 @@ export async function CrearHorario(request: Request, response: Response) {
 //   }
 // }
 
+// export async function CrearBloqueo(request: Request, response: Response) {
+//   const { fecha, hora_inicio, hora_fin, id_sucursal, dia_semana, repeticion } = request.body;
+
+//   const horaInicio = new Date(hora_inicio);
+//   const horaFin = new Date(hora_fin);
+  
+//   // Validación de fecha vigente
+//   if (new Date(fecha) < new Date()) {
+//     return response.status(400).send("Error: La fecha debe ser actual o futura");
+//   }
+
+//   // Validación de sobreposición de bloqueos con otros bloqueos
+//   const overlappingBloqueos = await prisma.horario.findMany({
+//     where: {
+//       id_sucursal: id_sucursal,
+//       bloqueo: true,
+//       OR: [
+//         {
+//           hora_inicio: {
+//             lt: hora_fin,
+//           },
+//           hora_fin: {
+//             gt: hora_inicio,
+//           },
+//         },
+//       ],
+//     },
+//   });
+
+//   if (overlappingBloqueos.length > 0) {
+//     return response.status(400).send("Error: Sobreposición de bloqueos");
+//   }
+
+//   try {
+//     const bloqueo = await prisma.horario.create({
+//       data: {
+//         fecha,
+//         dia_semana,
+//         hora_inicio: horaInicio,
+//         hora_fin: horaFin,
+//         id_sucursal,
+//         repeticion,
+//         bloqueo: true
+//       }
+//     });
+//     await prisma.$disconnect();
+//     return response.status(200).json(bloqueo);
+//   } catch (error) {
+//     await prisma.$disconnect();
+//     return response.status(400).send("Error: Bloqueo no pudo ser agregado");
+//   }
+// }
+
+
+
 export async function CrearBloqueo(request: Request, response: Response) {
   const { fecha, hora_inicio, hora_fin, id_sucursal, dia_semana, repeticion } = request.body;
 
   const horaInicio = new Date(hora_inicio);
   const horaFin = new Date(hora_fin);
-  
+  const fechaBloqueo = new Date(fecha);
+
   // Validación de fecha vigente
-  if (new Date(fecha) < new Date()) {
+  const fechaActual = new Date();
+  if (fechaBloqueo.setHours(0, 0, 0, 0) < fechaActual.setHours(0, 0, 0, 0)) {
     return response.status(400).send("Error: La fecha debe ser actual o futura");
   }
 
@@ -167,3 +226,5 @@ export async function CrearBloqueo(request: Request, response: Response) {
     return response.status(400).send("Error: Bloqueo no pudo ser agregado");
   }
 }
+
+ 

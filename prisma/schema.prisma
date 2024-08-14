@@ -1,0 +1,188 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Rol {
+  cliente
+  encargado
+  administrador
+}
+
+enum Sexo {
+  Macho
+  Hembra
+}
+
+enum DiaSemana {
+  Lunes
+  Martes
+  Miercoles
+  Jueves
+  Viernes
+  Sabado
+  Domingo
+}
+
+enum EstadoCita {
+  Pendiente
+  Confirmada
+  Reprogramada
+  Completada
+  Cancelada
+  No_asistio
+}
+
+enum MetodoPago {
+  Efectivo
+  Tarjeta
+  Transferencia
+}
+
+enum EstadoFactura {
+  Proforma
+  Facturada
+}
+
+enum TipoRepeticion {
+  Ninguno
+  Diario
+  Semanal
+  Mensual
+}
+
+model Usuario {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  telefono           String
+  correo_electronico String    @unique
+  direccion          String
+  fecha_nacimiento   DateTime
+  contrasena         String
+  rol                Rol
+  sucursal           Sucursal? @relation(fields: [id_sucursal], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_sucursal        Int? 
+  mascotas           Mascota[]
+  citas              Cita[]
+}
+model Sucursal {
+  id                 Int       @id @default(autoincrement())
+  nombre             String
+  descripcion        String
+  telefono           String
+  direccion          String
+  correo_electronico String    @unique
+  usuarios           Usuario[]
+  horarios           Horario[]
+  citas              Cita[]
+}
+
+model Mascota {
+  id               Int      @id @default(autoincrement())
+  nombre           String
+  especie          String
+  raza             String
+  sexo             Sexo
+  fecha_nacimiento DateTime
+  cliente          Usuario  @relation(fields: [id_cliente], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_cliente       Int
+  citas            Cita[]
+}
+
+model Servicio {
+  id              Int              @id @default(autoincrement())
+  nombre          String
+  descripcion     String
+  tarifa          Float
+  tiempo_servicio DateTime
+  Tipo_mascota    String
+  Especialidad    String
+  citas           Cita[]
+  detalle_factura DetalleFactura[]
+}
+
+model Categoria {
+  id        Int        @id @default(autoincrement())
+  nombre    String
+  productos Producto[]
+}
+
+model Producto {
+  id              Int              @id @default(autoincrement())
+  nombre          String
+  descripcion     String
+  categoria       Categoria        @relation(fields: [id_categoria], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_categoria    Int
+  precio          Float
+  Marca           String
+  Tipo_mascota    String
+  detalle_factura DetalleFactura[]
+}
+
+model Horario {
+  id          Int            @id @default(autoincrement())
+  sucursal    Sucursal       @relation(fields: [id_sucursal], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_sucursal Int
+  dia_semana  DiaSemana
+  hora_inicio DateTime
+  hora_fin    DateTime
+  fecha       DateTime?
+  bloqueo     Boolean        @default(false)
+  repeticion  TipoRepeticion
+}
+
+model Cita {
+  id            Int        @id @default(autoincrement())
+  cliente       Usuario    @relation(fields: [id_cliente], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_cliente    Int
+  mascota       Mascota?   @relation(fields: [id_mascota], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_mascota    Int?
+  servicio      Servicio?   @relation(fields: [id_servicio], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_servicio   Int?
+  sucursal      Sucursal   @relation(fields: [id_sucursal], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_sucursal   Int
+  fecha_cita    DateTime
+  hora_cita     DateTime
+  estado        EstadoCita
+  observaciones String
+  motivo        String // Por ejemplo: "¿Cuál es el motivo de la visita?"
+  condicion     String // Por ejemplo: "¿La mascota tiene alguna condición médica preexistente?"
+  vacunas       String // Por ejemplo: "¿La mascota ha recibido todas sus vacunas?"
+  facturas      Factura[]
+}
+
+model Factura {
+  id              Int              @id @default(autoincrement())
+  cita            Cita?            @relation(fields: [id_cita], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_cita         Int?
+  fecha_factura   DateTime
+  subtotal        Float
+  impuesto        Float
+  total           Float
+  metodo_pago     MetodoPago
+  estado          EstadoFactura
+  detalle_factura DetalleFactura[]
+}
+
+model DetalleFactura {
+  id              Int       @id @default(autoincrement())
+  factura         Factura   @relation(fields: [id_factura], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_factura      Int
+  producto        Producto? @relation(fields: [id_producto], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_producto     Int?
+  servicio        Servicio? @relation(fields: [id_servicio], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  id_servicio     Int?
+  cantidad        Int
+  precio_unitario Float
+  total_item      Float
+}

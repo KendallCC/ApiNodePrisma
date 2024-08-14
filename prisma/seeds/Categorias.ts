@@ -1,0 +1,22 @@
+export const categorias = [
+  { nombre: 'Alimentos' },
+  { nombre: 'Juguetes' },
+  { nombre: 'Higiene' },
+  { nombre: 'Medicamentos' },
+  { nombre: 'Accesorios' },
+  { nombre: 'Ropa' },
+  { nombre: 'Transportadoras' },
+  { nombre: 'Camas' },
+  { nombre: 'Correas' },
+  { nombre: 'Collares' },
+  { nombre: 'Arenas' },
+  { nombre: 'Filtros de Agua' },
+  { nombre: 'Peceras' },
+  { nombre: 'Terrarios' },
+  { nombre: 'Jaulas' },
+  { nombre: 'Comederos y Bebederos' },
+  { nombre: 'Productos Naturales' },
+  { nombre: 'Suplementos' },
+  { nombre: 'Equipos Médicos' },
+  { nombre: 'Otros' }
+];

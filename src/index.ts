@@ -23,6 +23,7 @@ import RutasHorario from './Routes/HorarioRoutes';
 import RutasCitas from './Routes/CitaRoutes';
 import RutasFacturas from './Routes/FacturaRoutes';
 import RutasDetalleFactura from './Routes/DetalleFacturaRoutes';
+import { authMiddleware } from './middleware/Auth';
 
 //?inicializacion de variables y puertos
 const prisma = new PrismaClient()
@@ -33,6 +34,8 @@ const port = process.env.PORT || 3000
 app.use(express.json())
 app.use(cors())
 app.use(express.urlencoded({ extended: true }))
+
+//authMiddleware,
 
 //?Configuracion de la ruta del api
 app.use('/categoria/', RutasCategoria)

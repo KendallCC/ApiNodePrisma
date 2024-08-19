@@ -1,4 +1,5 @@
 import { DiaSemana, EstadoCita, EstadoFactura, MetodoPago, PrismaClient } from "@prisma/client";
+import { log } from "console";
 
 import { Request, Response } from 'express';
 const prisma = new PrismaClient();
@@ -120,17 +121,25 @@ export async function CrearCita(req: Request, res: Response) {
   const { fecha, id_Cliente, id_sucursal, estado, id_Servicio, id_mascota, hora_inicio, observaciones, motivo, condicion, vacunas } = req.body;
   console.log(req.body);
 
+
   try {
     const fechaCita = new Date(fecha);
+    // const horaLocalCita = new Date(`${fecha.split('T')[0]}T${hora_inicio}:00.000-06:00`);
     const horaLocalCita = new Date(`${fecha.split('T')[0]}T${hora_inicio}:00.000-06:00`);
     const diaSemana = convertirDiaSemana(fechaCita.getUTCDay());
 
     const horaCitaUTC = new Date(horaLocalCita.toISOString());
 
+
+    console.log('fecha de la cita: ',fechaCita, 'Hora local de la cita: ',horaLocalCita,'Hora cita utc: ',horaCitaUTC);
+    
+
     // Obtener los servicios
     const servicios = await prisma.servicio.findMany({
       where: { id: { in: id_Servicio } }
     });
+
+    console.log('Estos son serivicios',servicios);
 
     // Calcular la duración total de los servicios
     const totalDuration = servicios.reduce((total, servicio) => total + new Date(servicio.tiempo_servicio).getUTCMinutes() + new Date(servicio.tiempo_servicio).getUTCHours() * 60, 0);
@@ -199,6 +208,7 @@ export async function CrearCita(req: Request, res: Response) {
     if (citasExistentes.length > 0) {
       return res.status(400).json('Ya existe una cita reservada en este horario.');
     }
+    console.log('llega al cliente para crear reserva: ',req.body);
 
     // Crear la cita
     const nuevaCita = await prisma.cita.create({
@@ -220,6 +230,9 @@ export async function CrearCita(req: Request, res: Response) {
     const subtotal = servicios.reduce((total, servicio) => total + servicio.tarifa, 0);
     const impuesto = subtotal * 0.13; // Suponiendo un 13% de IVA
     const total = subtotal + impuesto;
+
+    console.log(servicios);
+    
 
     // Crear la factura proforma
     const nuevaFactura = await prisma.factura.create({
@@ -260,6 +273,7 @@ export async function CrearCita(req: Request, res: Response) {
 export async function ActualizarCita(req: Request, res: Response) {
   const { id } = req.params;
   const { fecha, id_Cliente, id_sucursal, estado, id_Servicio, id_mascota, hora_inicio, observaciones, motivo, condicion, vacunas } = req.body;
+
 
   try {
     // Parsear fecha y hora en la zona horaria local de Costa Rica (UTC-6)
@@ -407,5 +421,127 @@ if (tieneBloqueo) {
   } catch (error) {
     console.error('Error al actualizar la cita:', error);
     return res.status(500).json('Error al actualizar la cita');
+  }
+}
+
+
+
+
+// export async function ListarCitasPorSucursalCliente(req: Request, res: Response) {
+//   const idCliente = parseInt(req.params.id, 10);
+
+//   try {
+//     // Obtener la sucursal del cliente
+//     const cliente = await prisma.usuario.findUnique({
+//       where: { id: idCliente },
+//       select: {
+//         sucursal: {
+//           select: {
+//             id: true,
+//             nombre: true,
+//           },
+//         },
+//       },
+//     });
+
+//     if (!cliente || !cliente.sucursal) {
+//       return res.status(404).json({ error: 'Sucursal no encontrada para el cliente proporcionado.' });
+//     }
+
+//     // Obtener todas las citas de la sucursal
+//     const citas = await prisma.cita.findMany({
+//       where: {
+//         id_sucursal: cliente.sucursal.id,
+//       },
+//       include: {
+//         servicio: true, // Incluye el servicio asociado
+//       },
+//     });
+
+//     // Calcular la duración de cada cita
+//     const citasConDuracion = citas.map(cita => {
+//       const duracionServicio = cita.servicio ? new Date(cita.servicio.tiempo_servicio) : null;
+//       const duracionTotal = duracionServicio
+//         ? duracionServicio.getUTCHours() * 60 + duracionServicio.getUTCMinutes()
+//         : 0;
+
+//       return {
+//         ...cita,
+//         duracion: duracionTotal,
+//       };
+//     });
+
+//     return res.status(200).json(citasConDuracion);
+//   } catch (error) {
+//     console.error('Error al obtener las citas:', error);
+//     return res.status(500).json({ error: 'Error al obtener las citas' });
+//   }
+// }
+
+
+export async function ListarCitasPorSucursalCliente(req: Request, res: Response) {
+  const idCliente = parseInt(req.params.id, 10);
+
+  try {
+    const cliente = await prisma.usuario.findUnique({
+      where: { id: idCliente },
+      select: {
+        sucursal: {
+          select: {
+            id: true,
+            nombre: true,
+          },
+        },
+      },
+    });
+
+    if (!cliente || !cliente.sucursal) {
+      return res.status(404).json({ error: 'Sucursal no encontrada para el cliente proporcionado.' });
+    }
+
+    // Obtener todas las citas de la sucursal con facturas y detalles de factura
+    const citas = await prisma.cita.findMany({
+      where: {
+        id_sucursal: cliente.sucursal.id,
+      },
+      include: {
+        facturas: {
+          include: {
+            detalle_factura: {
+              include: {
+                servicio: true, // Incluye los servicios en el detalle de la factura
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Calcular la duración de cada cita y la hora de fin sumando la duración de todos los servicios
+    const citasConDuracionYFin = citas.map(cita => {
+      const duracionTotal = cita.facturas.reduce((total, factura) => {
+        return total + factura.detalle_factura.reduce((subTotal, detalle) => {
+          if (detalle.servicio) {
+            const duracionServicio = new Date(detalle.servicio.tiempo_servicio);
+            return subTotal + (duracionServicio.getUTCHours() * 60 + duracionServicio.getUTCMinutes());
+          }
+          return subTotal;
+        }, 0);
+      }, 0);
+
+      const horaInicio = new Date(cita.hora_cita);
+      const horaFin = new Date(horaInicio.getTime() + duracionTotal * 60000);
+
+      return {
+        ...cita,
+        duracion: duracionTotal,
+        hora_fin: horaFin.toISOString(),  // Devuelve la hora de fin en formato ISO
+      };
+    });
+
+    return res.status(200).json(citasConDuracionYFin);
+  } catch (error) {
+    console.error('Error al obtener las citas:', error);
+    return res.status(500).json({ error: 'Error al obtener las citas' });
   }
 }

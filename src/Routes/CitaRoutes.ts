@@ -2,7 +2,7 @@
 import Express from "express"; 
 
 //? Funciones a utilizar
-import {ListarCitas,ObtenerCita,CrearCita,ActualizarCita,ListarporEncargado} from '../Controllers/CitaController'
+import {ListarCitas,ObtenerCita,CrearCita,ActualizarCita,ListarporEncargado, ListarCitasPorSucursalCliente} from '../Controllers/CitaController'
 
 //!Se inicializa la variable de Router
 const RutasCitas=Express.Router()
@@ -15,6 +15,7 @@ RutasCitas.get('/',ListarCitas)
 RutasCitas.get('/:id',ObtenerCita)
 RutasCitas.post('/',CrearCita)
 RutasCitas.put('/:id',ActualizarCita)
+RutasCitas.get('/sucursal/:id',ListarCitasPorSucursalCliente)
 
 
 

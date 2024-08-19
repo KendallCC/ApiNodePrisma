@@ -101,6 +101,9 @@ export async function Login(req: Request, res: Response) {
       where: { correo_electronico }
     });
 
+    console.log(usuario);
+    
+
     if (!usuario) {
       return res.status(401).json({ message: 'Usuario o contraseña incorrectos' });
     }
@@ -118,11 +121,13 @@ export async function Login(req: Request, res: Response) {
         id: usuario.id,
         nombre: usuario.nombre,
         correo_electronico: usuario.correo_electronico,
-        rol: usuario.rol
+        rol: usuario.rol,
+        sucursal:usuario.id_sucursal
       },
       process.env.JWT_SECRET || 'secret', // Asegúrate de tener una variable de entorno para el secreto
       { expiresIn: '1h' } // El token expira en 1 hora
     );
+
 
     // Devolver el token al cliente
     res.json({ token });

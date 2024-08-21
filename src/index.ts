@@ -23,8 +23,8 @@ import RutasHorario from './Routes/HorarioRoutes';
 import RutasCitas from './Routes/CitaRoutes';
 import RutasFacturas from './Routes/FacturaRoutes';
 import RutasDetalleFactura from './Routes/DetalleFacturaRoutes';
+import RutasReportes from './Routes/ReportesRoutes';
 import { authMiddleware } from './middleware/Auth';
-
 //?inicializacion de variables y puertos
 const prisma = new PrismaClient()
 const app = express()
@@ -48,7 +48,7 @@ app.use('/horario/', RutasHorario)
 app.use('/cita/', RutasCitas)
 app.use('/factura/', RutasFacturas)
 app.use('/detallefactura/', RutasDetalleFactura)
-
+app.use('/reportes/', RutasReportes)
 //!Inicializacion del puerto
 const server = app.listen(port, () =>
   console.log(`Server Activo en la url: http://localhost:${port}`)

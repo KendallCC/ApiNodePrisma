@@ -2,7 +2,7 @@
 import Express from "express"; 
 
 //? Funciones a utilizar
-import {ListarFacturas,ObtenerFactura,CrearFactura,ActualizarFactura, ActualizarFacturaYcitas, CrearFacturaSoloProductos} from '../Controllers/FacturaController'
+import {ListarFacturas,ObtenerFactura,CrearFactura,ActualizarFactura, ActualizarFacturaYcitas, CrearFacturaSoloProductos, eliminarFacturaYCitas} from '../Controllers/FacturaController'
 
 //!Se inicializa la variable de Router
 const RutasFacturas=Express.Router()
@@ -16,6 +16,6 @@ RutasFacturas.post('/carrito/productos',CrearFacturaSoloProductos)
 RutasFacturas.post('/',CrearFactura)
 RutasFacturas.put('/:id',ActualizarFactura)
 RutasFacturas.put('/carrito/:id',ActualizarFacturaYcitas)
-
+RutasFacturas.delete('/:id',eliminarFacturaYCitas)
 //Se exportan las rutas
 export default RutasFacturas;

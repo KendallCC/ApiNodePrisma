@@ -285,75 +285,40 @@ export async function ActualizarFacturaYcitas(req: Request, res: Response) {
   }
 }
 
-// export async function CrearFacturaSoloProductos(request: Request, response: Response) {
-//   const {
-//     fecha_factura = new Date(),
-//     detalle_productos,
-//     subtotal,
-//     impuesto,
-//     total,
-//     estado,
-//     metodo_pago
-//   } = request.body;
+export async function eliminarFacturaYCitas(request: Request, response: Response) {
+  const facturaId = parseInt(request.params.id, 10);
 
-//   const { id_cliente, id_sucursal } = request.body.user; // Datos del usuario
+  try {
+    // Verifica si la factura existe
+    const factura = await prisma.factura.findUnique({
+      where: { id: facturaId }
+    });
+
+    if (!factura) {
+      return response.status(404).json({ error: 'Factura no encontrada' });
+    }
+
+    // Primero, eliminamos las citas asociadas con la factura
+    await prisma.cita.deleteMany({
+      where: {
+        facturas: {
+          some: {
+            id: facturaId
+          }
+        }
+      }
+    });
 
 
-//   console.log(id_cliente,id_sucursal);
-  
-//   try {
-//     // Primero, crea una cita "dummy" para asociarla a la factura
-//     const nuevaCita = await prisma.cita.create({
-//       data: {
-//         cliente: { connect: { id: id_cliente } }, // Asociar la cita al cliente
-//         sucursal: { connect: { id: id_sucursal } }, // Asociar la cita a la sucursal del cliente
-//         fecha_cita: new Date(), // Usar la fecha actual como fecha de la cita
-//         hora_cita: new Date(), // Usar la hora actual
-//         estado: 'Confirmada', // Estado predeterminado para la cita
-//         observaciones: 'Cita generada automáticamente para la compra de productos',
-//         motivo: 'Compra de productos',
-//         condicion: '',
-//         vacunas: '',
-//       }
-//     });
 
-//     // Luego, crea la factura asociada a la cita recién creada
-//     const nuevaFactura = await prisma.factura.create({
-//       data: {
-//         fecha_factura: new Date(fecha_factura),
-//         subtotal,
-//         impuesto,
-//         total,
-//         estado,
-//         metodo_pago,
-//         cita: {
-//           connect: { id: nuevaCita.id }, // Conectar la factura con la cita recién creada
-//         },
-//         detalle_factura: {
-//           create: detalle_productos.map((producto: any) => ({
-//             producto: {
-//               connect: { id: producto.id_producto }, // Conectar producto por ID
-//             },
-//             cantidad: producto.cantidad,
-//             precio_unitario: producto.precio_unitario,
-//             total_item: producto.total_item,
-//           })),
-//         },
-//       },
-//       include: {
-//         detalle_factura: true, // Incluye los detalles en la respuesta
-//       },
-//     });
-
-//     response.status(200).json(nuevaFactura);
-//   } catch (error) {
-//     console.error("Error al crear factura:", error.message);
-//     response.status(400).send(`Error: la factura no pudo ser agregada - ${error.message}`);
-//   } finally {
-//     await prisma.$disconnect();
-//   }
-// }
-
+    response.status(200).json({ message: 'Factura y citas eliminadas correctamente.' });
+  } catch (error) {
+    console.error('Error eliminando la factura y las citas:', error);
+    response.status(500).json({ error: 'Error interno al eliminar la factura y las citas.' });
+  } finally {
+    await prisma.$disconnect();
+  }
+}
 
 
 export async function CrearFacturaSoloProductos(request: Request, response: Response) {

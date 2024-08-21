@@ -38,9 +38,15 @@ export async function ObtenerDetalleHorario(request: Request, response: Response
 export async function CrearHorario(request: Request, response: Response) {
   const { fecha, hora_inicio, hora_fin, id_sucursal, dia_semana, repeticion } = request.body;
 
+console.log(request.body);
+
+
   const horaInicio = new Date(hora_inicio);
   const horaFin = new Date(hora_fin);
   const fechaBloqueo = new Date(fecha);
+
+console.log('HORAS CONVERTIDAS',horaInicio,horaFin,fechaBloqueo);
+
 
   // Validación de fecha vigente
   const fechaActual = new Date();

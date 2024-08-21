@@ -167,7 +167,8 @@ export async function CrearCita(req: Request, res: Response) {
     const esHorarioValido = horarios.some(horario => {
       const horaInicioUTC = new Date(horario.hora_inicio);
       const horaFinUTC = new Date(horario.hora_fin);
-
+      console.log(horaCitaUTC,horaInicioUTC,horaCitaFinUTC,horaFinUTC);
+      
       return horaCitaUTC >= horaInicioUTC && horaCitaFinUTC <= horaFinUTC;
     });
 
@@ -429,59 +430,6 @@ if (tieneBloqueo) {
 
 
 
-
-// export async function ListarCitasPorSucursalCliente(req: Request, res: Response) {
-//   const idCliente = parseInt(req.params.id, 10);
-
-//   try {
-//     // Obtener la sucursal del cliente
-//     const cliente = await prisma.usuario.findUnique({
-//       where: { id: idCliente },
-//       select: {
-//         sucursal: {
-//           select: {
-//             id: true,
-//             nombre: true,
-//           },
-//         },
-//       },
-//     });
-
-//     if (!cliente || !cliente.sucursal) {
-//       return res.status(404).json({ error: 'Sucursal no encontrada para el cliente proporcionado.' });
-//     }
-
-//     // Obtener todas las citas de la sucursal
-//     const citas = await prisma.cita.findMany({
-//       where: {
-//         id_sucursal: cliente.sucursal.id,
-//       },
-//       include: {
-//         servicio: true, // Incluye el servicio asociado
-//       },
-//     });
-
-//     // Calcular la duración de cada cita
-//     const citasConDuracion = citas.map(cita => {
-//       const duracionServicio = cita.servicio ? new Date(cita.servicio.tiempo_servicio) : null;
-//       const duracionTotal = duracionServicio
-//         ? duracionServicio.getUTCHours() * 60 + duracionServicio.getUTCMinutes()
-//         : 0;
-
-//       return {
-//         ...cita,
-//         duracion: duracionTotal,
-//       };
-//     });
-
-//     return res.status(200).json(citasConDuracion);
-//   } catch (error) {
-//     console.error('Error al obtener las citas:', error);
-//     return res.status(500).json({ error: 'Error al obtener las citas' });
-//   }
-// }
-
-
 export async function ListarCitasPorSucursalCliente(req: Request, res: Response) {
   const idCliente = parseInt(req.params.id, 10);
 
@@ -730,6 +678,7 @@ export async function obtenerCitasParaMananaPorCliente(req: Request, res: Respon
       },
     });
 
+ console.log('citas del cliente para mañana: ',citas);
  
 
     return res.status(200).json(citas);

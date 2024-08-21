@@ -692,3 +692,83 @@ function obtenerColorPorEstado(estado: string): string {
       return '#6c757d'; // Gris por defecto
   }
 }
+
+
+
+
+
+
+export async function obtenerCitasParaMananaPorCliente(req: Request, res: Response) {
+  const idUsuario = parseInt(req.params.id, 10);
+  // Obtener la fecha de hoy
+  const today = new Date();
+  
+  // Obtener la fecha de mañana
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+  
+  // Establecer las horas para obtener el rango de mañana
+  const startOfTomorrow = new Date(tomorrow.setHours(0, 0, 0, 0));
+  const endOfTomorrow = new Date(tomorrow.setHours(23, 59, 59, 999));
+
+  try {
+    // Consultar las citas que coincidan con el ID del cliente, sean para mañana, y estén en estado 'Pendiente'
+    const citas = await prisma.cita.findMany({
+      where: {
+        id_cliente: idUsuario,
+        fecha_cita: {
+          gte: startOfTomorrow,
+          lt: endOfTomorrow,
+        },
+        estado: 'Pendiente', // Filtrar por estado 'Pendiente'
+      },
+      include: {
+        cliente: true,
+        servicio: true,
+        mascota: true,
+        sucursal: true,
+      },
+    });
+
+ 
+
+    return res.status(200).json(citas);
+
+  } catch (error) {
+    return res.status(500).json({ error: 'Error al obtener las citas' });
+  
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+
+export async function confirmarCita(req: Request, res: Response) {
+  const idCita = parseInt(req.params.id, 10);
+
+  try {
+    // Verificar que la cita existe
+    const cita = await prisma.cita.findUnique({
+      where: { id: idCita }
+    });
+
+    if (!cita) {
+      return res.status(404).json({ error: 'Cita no encontrada' });
+    }
+
+    // Actualizar el estado de la cita a "Confirmada"
+    const citaActualizada = await prisma.cita.update({
+      where: { id: idCita },
+      data: {
+        estado: 'Confirmada'
+      }
+    });
+
+    return res.status(200).json(citaActualizada);
+  } catch (error) {
+    console.error('Error al confirmar la cita:', error);
+    return res.status(500).json({ error: 'Error al confirmar la cita' });
+  } finally {
+    await prisma.$disconnect();
+  }
+}

@@ -56,7 +56,7 @@ const server = app.listen(port, () =>
 
 
 // Configura la tarea programada para ejecutarse todos los días a las 5 PM
-cron.schedule('12 22 * * *', async () => {
+cron.schedule('21 23 * * *', async () => {
   console.log('Ejecutando tarea programada para enviar recordatorios de citas');
 
   // Obtener la fecha de hoy y la fecha de mañana
@@ -81,6 +81,7 @@ cron.schedule('12 22 * * *', async () => {
     }
   });
 
+  console.log(citas);
   
 
   // Enviar recordatorios para cada cita
@@ -97,9 +98,11 @@ cron.schedule('12 22 * * *', async () => {
       Gracias,
       Vedpet
     `;
-    console.log(emailText);
+
     
-    await sendReminderEmail('kendall26092002@gmail.com', 'Recordatorio de cita', emailText);
+    await sendReminderEmail('starco26092002@gmail.com', 'Recordatorio de cita', emailText);
+ 
+    console.log('correo enviado.');
   }
 });
 

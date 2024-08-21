@@ -12,7 +12,8 @@
     "express": "4.19.2",
     "jsonwebtoken": "^9.0.2",
     "node-cron": "^3.0.3",
-    "nodemailer": "^6.9.14"
+    "nodemailer": "^6.9.14",
+    "resend": "^4.0.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",

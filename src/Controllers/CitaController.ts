@@ -1,10 +1,13 @@
-import { DiaSemana, EstadoCita, EstadoFactura, MetodoPago, PrismaClient } from "@prisma/client";
-import { log } from "console";
+import { DiaSemana, EstadoCita, EstadoFactura, MetodoPago, PrismaClient, Rol } from "@prisma/client";
+
 
 import { Request, Response } from 'express';
 const prisma = new PrismaClient();
 
-
+// Definición de horarios laborales (ejemplo: lunes a viernes de 9:00 a 18:00)
+const HORARIOS_LABORALES = [
+  { daysOfWeek: [1, 2, 3, 4, 5], startTime: '06:00', endTime: '18:00' },
+];
 
 export async function ListarporEncargado(request: Request, response: Response) {
   const id = request.params.id
@@ -543,5 +546,149 @@ export async function ListarCitasPorSucursalCliente(req: Request, res: Response)
   } catch (error) {
     console.error('Error al obtener las citas:', error);
     return res.status(500).json({ error: 'Error al obtener las citas' });
+  }
+}
+
+
+
+
+
+
+
+export async function ObtenerCitasHorariosYBloqueos(req: Request, res: Response) {
+  const idUsuario = parseInt(req.params.id, 10);
+
+  try {
+    // Obtener el usuario y su rol
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: idUsuario },
+      select: {
+        rol: true,
+        sucursal: {
+          select: {
+            id: true,
+          },
+        },
+      },
+    });
+
+    if (!usuario) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+
+    let sucursalId: number | undefined;
+    const esCliente = usuario.rol === 'cliente';
+    const esEncargado = usuario.rol === 'encargado';
+    const esAdministrador = usuario.rol === 'administrador';
+
+    // Si el usuario es un encargado, obtenemos el id de la sucursal correspondiente
+    if (esEncargado && usuario.sucursal) {
+      sucursalId = usuario.sucursal.id;
+    }
+
+    // Configurar el filtro de citas basado en el rol del usuario
+    const whereCitas = {
+      ...(sucursalId ? { id_sucursal: sucursalId } : {}),
+      motivo: {
+        not: 'Compra de productos',
+      },
+      ...(esCliente ? { OR: [{ id_cliente: idUsuario }, { id_cliente: { not: idUsuario } }] } : {}),
+    };
+
+    // Obtener las citas basadas en los permisos del usuario
+    const citas = await prisma.cita.findMany({
+      where: whereCitas,
+      include: {
+        servicio: true,
+        cliente: true,
+        facturas: {
+          select: {
+            id: true,
+          },
+        },
+      },
+      orderBy: {
+        hora_cita: 'asc',
+      },
+    });
+
+    // Formatear las citas
+    const citasFormatted = citas.map((cita) => {
+      const horaInicio = new Date(cita.hora_cita);
+      const duracion = cita.servicio ? new Date(cita.servicio.tiempo_servicio).getUTCMinutes() : 0;
+      const horaFin = new Date(horaInicio.getTime() + duracion * 60000);
+
+      let title = cita.motivo;
+      let color = obtenerColorPorEstado(cita.estado);
+      let display = 'auto';
+
+      if (esCliente && cita.id_cliente !== idUsuario) {
+        // Si es cliente y la cita no es suya, mostrarla como ocupada
+        title = 'Ocupado';
+        color = '#ff0000';
+        display = 'background';
+      }
+
+      return {
+        id: cita.id,
+        title: title,
+        start: horaInicio.toISOString(),
+        end: horaFin.toISOString(),
+        color: color,
+        extendedProps: {
+          idFactura: cita.facturas.length > 0 ? cita.facturas[0].id : null,
+          esCitaPropia: cita.id_cliente === idUsuario,
+        },
+        display: display,
+      };
+    });
+
+    // Obtener bloqueos
+    const bloqueos = await prisma.horario.findMany({
+      where: {
+        ...(sucursalId ? { id_sucursal: sucursalId } : {}),
+        bloqueo: true,
+      },
+    });
+
+    // Formatear los bloqueos
+    const bloqueosFormatted = bloqueos.map((bloqueo) => ({
+      title: 'Bloqueado',
+      start: bloqueo.hora_inicio.toISOString(),
+      end: bloqueo.hora_fin.toISOString(),
+      display: 'background',
+      backgroundColor: '#ff0000',
+      borderColor: '#ff0000',
+    }));
+
+    // Responder con los datos necesarios
+    return res.status(200).json({
+      horariosLaborales: HORARIOS_LABORALES, // Esto debe ser definido con los horarios laborales de la sucursal
+      citas: citasFormatted,
+      bloqueos: bloqueosFormatted,
+    });
+  } catch (error) {
+    console.error('Error al obtener las citas, horarios y bloqueos:', error);
+    return res.status(500).json({ error: 'Error al obtener las citas, horarios y bloqueos' });
+  }
+}
+
+
+function obtenerColorPorEstado(estado: string): string {
+  switch (estado) {
+    case 'Pendiente':
+      return '#FFA500'; // Naranja
+    case 'Confirmada':
+      return '#28a745'; // Verde
+    case 'Reprogramada':
+      return '#17a2b8'; // Azul claro
+    case 'Completada':
+      return '#6c757d'; // Gris
+    case 'Cancelada':
+      return '#dc3545'; // Rojo
+    case 'No_asistio':
+      return '#3f3440'; // Negro
+    default:
+      return '#6c757d'; // Gris por defecto
   }
 }

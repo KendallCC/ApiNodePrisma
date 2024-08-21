@@ -17,6 +17,9 @@ export const sendReminderEmail = async (to: string, subject: string, text: strin
     text
   };
 
+console.log(mailOptions);
+
+
   try {
     const info = await transporter.sendMail(mailOptions);
     console.log('Correo enviado:', info.response);
@@ -24,3 +27,8 @@ export const sendReminderEmail = async (to: string, subject: string, text: strin
     console.error('Error al enviar correo:', error);
   }
 };
+
+
+
+
+//mlsn.f3665666e683ded4b6dfe3f8f542e08c04fad3cfa4ce5f9220229352dd6ff921
